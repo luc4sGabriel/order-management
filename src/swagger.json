@@ -1,0 +1,200 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API Orders",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "http://localhost:3000" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "RegisterRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string", "example": "test2@example.com" },
+          "password": { "type": "string", "example": "12345" }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        }
+      },
+      "Service": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "value": { "type": "number" },
+          "status": { "type": "string", "example": "PENDING" },
+          "_id": { "type": "string" }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "properties": {
+          "_id": { "type": "string" },
+          "lab": { "type": "string" },
+          "patient": { "type": "string" },
+          "customer": { "type": "string" },
+          "state": { "type": "string", "example": "CREATED" },
+          "status": { "type": "string", "example": "ACTIVE" },
+          "services": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Service" }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/auth/register": {
+      "post": {
+        "summary": "Registrar usuário",
+        "tags": ["Auth"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterRequest" }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Usuário registrado" }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "summary": "Login",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token JWT",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/LoginResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/order/new": {
+      "post": {
+        "summary": "Criar novo pedido",
+        "tags": ["Order"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "lab": "Laboratório ZYX",
+                "patient": "Maria gasosa",
+                "customer": "Hospital da esquina",
+                "services": [
+                  { "name": "Exame de sangue", "value": 50 },
+                  { "name": "Anemia", "value": 130 }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pedido criado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Order" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/order": {
+      "get": {
+        "summary": "Listar pedidos",
+        "tags": ["Order"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "number", " example": 1 }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "schema": { "type": "string", "example": "CREATED" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginada",
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": [],
+                  "meta": {
+                    "page": 1,
+                    "total": 2,
+                    "totalPages": 1
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/order/{id}/advance": {
+      "patch": {
+        "summary": "Avançar estado do pedido",
+        "tags": ["Order"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pedido atualizado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Order" }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

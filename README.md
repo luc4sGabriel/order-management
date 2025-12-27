@@ -73,7 +73,7 @@ PATCH /order/:id/advance
 A API automaticamente avança o pedido para o próximo state válido.
 
 
-# COMO RODAR O PROJETO
+# COMO RODAR O PROJETO ✅🔛
 
 
 ## Clonar o repositório
@@ -133,12 +133,15 @@ npm run dev
 
 ---
 
-## Testar a API
+## Documentacao
 
-### Rota de teste
+### Rota default do swagger para documentacao
 
-Usarei o swagger pra documentar e testar as rotas
-e deixo uma rota padrao pra testar ..
+http://localhost:3000/docs/
+
+Mostra todos os endpoints da api
+
+---
 
 ## Rodar testes unitários
 
