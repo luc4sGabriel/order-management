@@ -1,6 +1,5 @@
-import { Schema, model, Document } from "mongoose"
+import { Schema, model } from "mongoose"
 import { IUser } from "../types/user.type";
-import { minLength } from "zod";
 
 const UserSchema = new Schema<IUser>({
     email: {

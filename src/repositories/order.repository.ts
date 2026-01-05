@@ -1,47 +1,54 @@
-import { CreateOrderDTO } from "../dtos/create.order.dto";
-import { OrderModel, IOrder, State, Status, ServicesStatus } from "../models/Order";
+import { OrderModel } from "../models/Order";
+import { orderStates, orderStatus } from "../types/enum/enums.type";
+import { IOrder } from "../types/order.type";
+import { CreateOrderDto, CreateOrderDTO } from "../dtos/order.dto";
+import { paginate } from "../utils/paginate";
 
 export class OrderRepository {
-  // Precisei tipar com o DTO pra o type inferir o tipo certo no service
-  async create(data: CreateOrderDTO & {
-    state: State;
-    status: Status;
-    services: { name: string; value: number; status: ServicesStatus }[];
-  }) {
-    return OrderModel.create(data);
+  // Precisei tipar com o DTO pra o typescript inferir o tipo certo no service , dai que criei os dtos tudo ..
+  async create(data: CreateOrderDto): Promise<IOrder> {
+    const order = new OrderModel({
+      ...data,
+      state: orderStates.CREATED,
+      status: orderStatus.ACTIVE,
+    });
+
+    return order.save();
   }
 
-  // Recebe
-  async changeState(id: string, newState: State){
-    return OrderModel.findByIdAndUpdate(id, { state: newState }, { new: true });
+  async changeState(id: string, state: orderStates): Promise<IOrder | null> {
+    return OrderModel.findByIdAndUpdate(id, { state, updatedAt: new Date() }, { new: true });
   }
 
-  async findPaginated(
-    filters: Record<string, any>,
+  async findAll(
     page: number,
+    limit: number,
+    state?: orderStates,
   ) {
-    const skip = (page - 1) * 20;
-
-    const [orders, total] = await Promise.all([
-      OrderModel.find(filters)
-        .skip(skip)
-        .limit(20)
-        .lean<IOrder[]>(),
-      OrderModel.countDocuments(filters),
-    ]);
-
-    return {
-      data: orders,
-      meta: {
-        page,
-        total,
-        totalPages: Math.ceil(total / 20),
-      },
+    const filter: any = {
+      deletedAt: null,
     };
+
+    if (state) {
+      filter.state = state;
+    }
+
+    return paginate<IOrder>(OrderModel, {
+      filter,
+      page,
+      limit,
+    });
+  }
+
+  async softDelete(id: string): Promise<IOrder | null> {
+    return OrderModel.findByIdAndUpdate(id,
+      { status: orderStatus.DELETED, updatedAt: new Date() },
+      { new: true }
+    );
   }
 
   // Ao que parece o mongoose cria as tabelas com um capo _id automaticamente , entao da pra buscar os Orders por id ._.
-  async findById(id: string) {
+  async findById(id: string): Promise<IOrder | null> {
     return OrderModel.findById(id);
   }
 

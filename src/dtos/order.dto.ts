@@ -33,4 +33,7 @@ export const fecthOrdersQuerySchema = z.object({
   state: z.enum(orderStates).optional(),
 });
 
+export type CreateOrderDto = z.infer<typeof CreateOrderDTO>;
+export type ListOrdersQueryDto = z.infer<typeof fecthOrdersQuerySchema>;
+
 
