@@ -2,76 +2,69 @@
 um pouco desse formato de Document que ele usa , e tbm pra criar o schema e o model direito 
 Achei ele um pouco verboso , to acostumado mais com o prisma msm */
 
-import { Schema, model, Document } from "mongoose";
-
-// ENUM state: CREATED -> ANALYSIS -> COMPLETED
-export enum State {
-    CREATED = "CREATED",
-    ANALYSIS = "ANALYSIS",
-    COMPLETED = "COMPLETED"
-}
-
-// ENUM status: ACTIVE | DELETED
-export enum Status {
-    ACTIVE = "ACTIVE",
-    DELETED = "DELETED"
-}
-
-// ENUM status services (Array obrigatório): { name: string, value: number, status: 'PENDING' | 'DONE' } . OBS: Só o de status !!
-
-export enum ServicesStatus {
-    PENDING = "PENDING",
-    DONE = "DONE"
-}
+import { Schema, model } from "mongoose";
+import { orderStates, orderStatus, serviceStatus } from "../types/enum/enums.type";
+import { IOrder, IService } from "../types/order.type";
 
 // { name: string, value: number, status: 'PENDING' | 'DONE' }
-export interface Services {
-    name: string;
-    value: number;
-    status: ServicesStatus;
-}
-
-export interface IOrder extends Document {
-    lab: string;
-    patient: string;
-    customer: string;
-    state: State;
-    status: Status;
-    services: Services[];
-}
-
-const OrderSchema = new Schema<IOrder>({
-    lab: { type: String, required: true },
-    patient: { type: String, required: true },
-    customer: { type: String, required: true },
-
-    state: {
+const orderServiceSchema = new Schema<IService>({
+    name: {
         type: String,
-        enum: Object.values(State),
-        default: State.CREATED
+        required: [true, "Service name is required"],
+        trim: true
     },
-
+    value: {
+        type: Number,
+        min: [0, "Service value must be positive"],
+        required: [true, "Service value is required"],
+    },
     status: {
         type: String,
-        enum: Object.values(Status),
-        default: Status.ACTIVE
-    },
+        enum: Object.values(serviceStatus),
+        default: serviceStatus.PENDING,
+        required: true
+    }
+})
 
+// antes tava assim: const OrderSchema = new Schema<IOrder>({...})
+// porem tava dando erro de tipagem no moongose com o typescript na hora, resolvi deixando assim ..
+// dessa forma o proprio mongoose ja infere o tipo do schema
+// tentei tipar e fui nerfado pelo typescript ..
+const OrderSchema = new Schema<IOrder>({
+    lab: {
+        type: String,
+        required: [true, "Lab is required"],
+        trim: true
+    },
+    patient: {
+        type: String,
+        required: [true, "Patient is required"],
+        trim: true
+    },
+    customer: {
+        type: String,
+        required: [true, "Customer is required"],
+        trim: true
+    },
+    state: {
+        type: String,
+        enum: Object.values(orderStates),
+        default: orderStates.CREATED
+    },
+    status: {
+        type: String,
+        enum: Object.values(orderStatus),
+        default: orderStatus.ACTIVE
+    },
     services: {
-        type: [
-            {
-                name: { type: String, required: true },
-                value: { type: Number, required: true },
-                status: {
-                    type: String,
-                    enum: Object.values(ServicesStatus),
-                    default: ServicesStatus.PENDING,
-                    required: true
-                }
-            }
-        ],
-        required: true,
-        validate: [(v: Services[]) => v.length > 0, "Service is required"]
+        type: [orderServiceSchema],
+        required: [true, "At least one service is required"],
+        validate: {
+            validator: function (services: IService[]) {
+                return Array.isArray(services) && services.length > 0;
+            },
+            message: "Order must have at least one service"
+        }
     }
 });
 

@@ -27,6 +27,7 @@ export interface IOrder extends Document {
     customer: string;
     state: orderStates;
     status: orderStatus;
+    services: IService[];
     createdAt: Date;
     updatedAt: Date;
 }
