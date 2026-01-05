@@ -1,0 +1,13 @@
+refactor: cria as interfaces de cada modelo pra usar no model extendendo do Document
+feat: fazer os dtos com zod
+feat: Fazer os types de quase tudo como aqui em baixo nos IOrder e IUser
+refactor: nos repositories pra receber um dto(dados brutos) e devolver um IOrder || IUser 
+refactor: o config do mongoose pra criar erros de conexao do banco
+feat: criar env.ts no config pra configurar as variaveis com o zod
+feat: criar os mappers de user e order
+refactor: os nomes de erros e as instancias com o zod , deixar uma pasta unica e erros mais genericos
+test: Aumentar area de cobertura dos testes
+
+se der tempo , faz os utils com o bcript , jwt .. pra usar nos testes mais facil
+
+entrega e ora a deus 
