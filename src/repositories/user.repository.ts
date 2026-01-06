@@ -6,7 +6,10 @@ import { paginate } from "../utils/paginate";
 export class UserRepository {
     async findByEmail(email: string): Promise<IUser | null> {
         // Seleciona o campo password que por padrao esta com select: false no schema
-        return UserModel.findOne({ email, deletedAt: null }).select('+password');
+        return UserModel.findOne({
+            email: email.trim().toLowerCase(),
+            deletedAt: null
+        }).select("+password");
     }
 
     async findById(id: string): Promise<IUser | null> {
@@ -22,14 +25,15 @@ export class UserRepository {
         });
     }
 
-    async create(data: CreateUserDto): Promise<IUser> {
+    async create(data: CreateUserDto & { password: string}): Promise<IUser> {
         const user = new UserModel({
             ...data,
             deletedAt: null, // ja deixo o campo deletedAt como null ao criar
         });
 
+        console.log("Creating user with data:", user);
         // salva no banco
-        return user.save();
+        return await user.save();
     }
 
     // soft delete: apenas marca a data de exclusao sem remover o registro do banco

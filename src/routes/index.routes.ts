@@ -17,12 +17,7 @@ routes.use('/docs', swagger.serve, swagger.setup(swaggerDocument))
 
 // Rotas públicas
 routes.use("/auth", authRoutes);
-
-// Middleware de autenticação
-routes.use(accessMiddleware);
-
-// Rotas protegidas
-routes.use("/orders", orderRoutes);
 routes.use("/users", userRoutes);
+routes.use("/orders", accessMiddleware, orderRoutes);
 
 export default routes;

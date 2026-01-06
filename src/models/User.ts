@@ -11,10 +11,11 @@ const UserSchema = new Schema<IUser>({
         validate: {
             validator: function (email: string) {
                 return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
+            },
+            message: "Invalid Email",
         },
-        message: "Invalid Email",
     },
-    password: { 
+    password: {
         type: String,
         required: [true, "Password is required"],
         minLength: [8, "Password must be at least 8 characters long"],
@@ -23,7 +24,10 @@ const UserSchema = new Schema<IUser>({
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
     deletedAt: { type: Date, default: null },
+    },
+    {
+        timestamps: true,
     }
-})
+);
 
 export const UserModel = model<IUser>("User", UserSchema);
