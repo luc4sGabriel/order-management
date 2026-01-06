@@ -1,7 +1,7 @@
 import { IOrder, IOrderResponse } from "../types/order.type";
 import { PaginatedResponse } from "../types/pagination.types";
 
-export class orderPresenter {
+export class OrderPresenter {
   static toHttp(order: IOrder): IOrderResponse {
     return {
       id: order._id.toString(),
@@ -20,7 +20,7 @@ export class orderPresenter {
     paginated: PaginatedResponse<IOrder>
   ): PaginatedResponse<IOrderResponse> {
     return {
-      data: paginated.data.map(orderPresenter.toHttp),
+      data: paginated.data.map(OrderPresenter.toHttp),
       meta: paginated.meta,
     };
   }

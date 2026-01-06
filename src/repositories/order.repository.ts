@@ -16,8 +16,11 @@ export class OrderRepository {
     return order.save();
   }
 
-  async changeState(id: string, state: orderStates): Promise<IOrder | null> {
-    return OrderModel.findByIdAndUpdate(id, { state, updatedAt: new Date() }, { new: true });
+  async changeState(id: string, state: orderStates): Promise<IOrder> {
+    const order = await OrderModel.findByIdAndUpdate(id, { state, updatedAt: new Date() }, { new: true });
+
+    if (!order) throw new Error("Order not found");
+    return order;
   }
 
   async findAll(
@@ -52,7 +55,4 @@ export class OrderRepository {
     return OrderModel.findById(id);
   }
 
-  async save(order: IOrder) {
-    return order.save();
-  }
 }

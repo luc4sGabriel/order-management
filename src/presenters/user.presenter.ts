@@ -1,7 +1,7 @@
 import { IUser, IUserResponse } from "../types/user.type";
 import { PaginatedResponse } from "../types/pagination.types";
 
-export class userPresenter {
+export class UserPresenter {
   static toHttp(user: IUser): IUserResponse {
     return {
       id: user._id.toString(),
@@ -15,7 +15,7 @@ export class userPresenter {
     paginated: PaginatedResponse<IUser>
   ): PaginatedResponse<IUserResponse> {
     return {
-      data: paginated.data.map(userPresenter.toHttp),
+      data: paginated.data.map(UserPresenter.toHttp),
       meta: paginated.meta,
     };
   }
