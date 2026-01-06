@@ -1,4 +1,6 @@
 import { CreateOrderDto } from "../dtos/order.dto";
+import { BadRequestError } from "../errors/bad-request-error";
+import { NotFoundError } from "../errors/not-found-error";
 import { OrderPresenter } from "../presenters/order.presenter";
 import { OrderRepository } from "../repositories/order.repository";
 import { orderStates } from "../types/enum/enums.type";
@@ -8,34 +10,34 @@ import { PaginatedResponse } from "../types/pagination.types";
 export class OrderService {
     constructor(
         private orderRepository: OrderRepository,
-        private orderPresenter: typeof OrderPresenter
     ) { }
 
     async create(data: CreateOrderDto): Promise<IOrderResponse> {
         if (!data.services || data.services.length === 0) {
-            throw new Error("At least one service is required");
+            throw new BadRequestError("At least one service must be provided");
         }
 
         const totalValue = data.services.reduce((sum, s) => sum + s.value, 0);
         if (totalValue <= 0) {
-            throw new Error("Total value of services must be greater than zero");
+            throw new BadRequestError("Total value of services must be greater than zero");
         }
 
         // tudo validado no zod pae
         const order = await this.orderRepository.create(data);
 
-        return this.orderPresenter.toHttp(order);
+        return OrderPresenter.toHttp(order);
     }
 
     async advance(id: string): Promise<IOrderResponse> {
         const order = await this.orderRepository.findById(id);
 
         if (!order) {
-            throw new Error("Order not found");
+            throw new NotFoundError("Order");
         }
 
         let nextState: orderStates;
 
+        // sei que desse jeito seria horrivel pra escalar, seria bacana fazer um util bonitinho pra ajeitar e escalar a nivel de producao caso futuramente tenha um novo state .. o que me ferrou aqui foi o tempo mesmo
         switch (order.state) {
             case orderStates.CREATED:
                 nextState = orderStates.ANALYSIS;
@@ -44,14 +46,14 @@ export class OrderService {
                 nextState = orderStates.COMPLETED;
                 break;
             case orderStates.COMPLETED:
-                throw new Error("Order is already completed");
+                throw new BadRequestError("Order is already completed and cannot be advanced");
             default:
-                throw new Error("Invalid order state");
+                throw new BadRequestError("Invalid order state");
         }
 
         const updatedOrder = await this.orderRepository.changeState(id, nextState);
 
-        return this.orderPresenter.toHttp(updatedOrder);
+        return OrderPresenter.toHttp(updatedOrder);
     }
 
     async findAll(
@@ -61,7 +63,7 @@ export class OrderService {
     ): Promise<PaginatedResponse<IOrderResponse>> {
         const result = await this.orderRepository.findAll(page, limit, state);
 
-        const data = result.data.map(order => this.orderPresenter.toHttp(order));
+        const data = result.data.map(order => OrderPresenter.toHttp(order));
 
         return {
             ...result,
@@ -69,34 +71,34 @@ export class OrderService {
         };
     }
 
-    async softDelete(id: string): Promise<IOrder> {
+    async softDelete(id: string): Promise<IOrderResponse> {
         const order = await this.orderRepository.findById(id);
         
         if (!order) {
-            throw new Error("Order not found");
+            throw new NotFoundError("Order");
         }
 
         if (order.state === orderStates.COMPLETED) {
-            throw new Error("Completed orders cannot be deleted");
+            throw new BadRequestError("Completed orders cannot be deleted");
         }
 
         const deletedOrder = await this.orderRepository.softDelete(id);
 
         if (!deletedOrder) {
-            throw new Error("Failed to delete order");
+            throw new NotFoundError("Order");
         }
 
-        return deletedOrder;
+        return OrderPresenter.toHttp(deletedOrder);
     }
 
     async findById(id: string): Promise<IOrderResponse> {
         const order = await this.orderRepository.findById(id);
 
         if (!order) {
-            throw new Error("Order not found");
+            throw new NotFoundError("Order");
         }
 
-        return this.orderPresenter.toHttp(order);
+        return OrderPresenter.toHttp(order);
     }
 
 }

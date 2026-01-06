@@ -1,4 +1,7 @@
 import { CreateUserDto, UpdateUserDto } from "../dtos/user.dto";
+import { BadRequestError } from "../errors/bad-request-error";
+import { ConflictError } from "../errors/conflict-error";
+import { NotFoundError } from "../errors/not-found-error";
 import { UserPresenter } from "../presenters/user.presenter";
 import { UserRepository } from "../repositories/user.repository";
 import { PaginatedResponse } from "../types/pagination.types";
@@ -14,9 +17,8 @@ export class UserService {
     async findById(id: string): Promise<IUserResponse> {
         const user = await this.userRepository.findById(id);
 
-        // fazer os erros depois
         if (!user) {
-            throw new Error("User not found");
+            throw new NotFoundError("User");
         }
 
         return UserPresenter.toHttp(user);
@@ -25,28 +27,32 @@ export class UserService {
     async findByEmail(email: string): Promise<IUser> {
         const user = await this.userRepository.findByEmail(email);
 
-        // fazer os erros depois
         if (!user) {
-            throw new Error("User not found");
+            throw new NotFoundError("User");
         }
 
         // nao converto para IUserResponse pq essa funcao eh usada internamente
+        // fica como IUser mesmo
         return user;
     }
 
     async findAll(
         page: number,
         limit: number
-    ): Promise<PaginatedResponse<IUser>> {
-        return this.userRepository.findAll(page, limit);
+    ): Promise<PaginatedResponse<IUserResponse>> {
+        const result = await this.userRepository.findAll(page, limit);
+
+        return {
+            ...result,
+            data: result.data.map(UserPresenter.toHttp),
+        };
     }
 
     async create(data: CreateUserDto): Promise<IUser> {
         const existingUser = await this.userRepository.findByEmail(data.email);
 
-        // fazer erros dps
         if (existingUser) {
-            throw new Error("Email already in use");
+            throw new ConflictError("Email already in use");
         }
 
         // DEPOIS FAZER UM UTIL PRA ISSO ..
@@ -66,17 +72,17 @@ export class UserService {
         const user = await this.userRepository.findById(id);
 
         if (!user) {
-            throw new Error("User not found");
+            throw new NotFoundError("User");
         }
 
         if (user.deletedAt) {
-            throw new Error("User already deleted");
+            throw new BadRequestError("User is already deleted");
         }
 
         const deletedUser = await this.userRepository.softDelete(id);
 
         if (!deletedUser) {
-            throw new Error("Failed to delete user");
+            throw new NotFoundError("User");
         }
 
         return deletedUser;
@@ -89,11 +95,11 @@ export class UserService {
         const user = await this.userRepository.findById(id);
 
         if (!user) {
-            throw new Error("User not found");
+            throw new NotFoundError("User");
         }
 
         if (user.deletedAt) {
-            throw new Error("User is deleted");
+            throw new BadRequestError("Cannot update a deleted user");
         }
 
         // tava dando erro na tipagem sem isso .. 
@@ -111,7 +117,7 @@ export class UserService {
         const updatedUser = await this.userRepository.update(id, updateData);
 
         if (!updatedUser) {
-            throw new Error("Failed to update user");
+            throw new NotFoundError("User");
         }
 
         return updatedUser;

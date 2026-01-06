@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { CreateUserDto, FetchUsersQueryDto, UpdateUserDto } from "../dtos/user.dto";
 import { UserService } from "../services/user.service";
-import { AppError } from "../errors/app-error";
+import { BadRequestError } from "../errors/bad-request-error";
 
 export class UserController {
     constructor(
@@ -22,7 +22,7 @@ export class UserController {
         const { id } = req.params;
 
         if (!id) {
-            throw new AppError("User ID is required", 400);
+            throw new BadRequestError("User ID is required");
         }
 
         const user = await this.userService.findById(id);
@@ -50,10 +50,10 @@ export class UserController {
         const { email } = req.params;
 
         if (!email) {
-            throw new AppError("Email is required", 400);
+            throw new BadRequestError("Email is required");
         }
 
-        const user = await this.userService.findById(email);
+        const user = await this.userService.findByEmail(email);
 
         res.status(200).json({
             data: user,
@@ -64,7 +64,7 @@ export class UserController {
         const { id } = req.params;
 
         if (!id) {
-            throw new AppError("User ID is required", 400);
+            throw new BadRequestError("User ID is required");
         }
 
         const user = await this.userService.softDelete(id);
@@ -79,7 +79,7 @@ export class UserController {
         const { id } = req.params;
 
         if (!id) {
-            throw new AppError("User ID is required", 400);
+            throw new BadRequestError("User ID is required");
         }
 
         const data: UpdateUserDto = req.body;
