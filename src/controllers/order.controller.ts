@@ -1,23 +1,24 @@
 import { Request, Response } from "express";
-import { FindPaginatedOrderService } from "../services/Order/find.paginated.order.service";
-import { OrderRepository } from "../repositories/order.repository";
-import { State } from "../models/Order";
-import { CreateOrderService } from "../services/Order/create.order.service";
-import { ChangeStateService } from "../services/Order/change.state.order.service";
 import { AppError } from "../errors/app-error";
 import { ServiceError } from "../services/errors/service-errors";
+import { CreateOrderDto, FetchOrderQueryDto } from "../dtos/order.dto";
+import { OrderService } from "../services/order.service";
+import { orderStates } from "../types/enum/enums.type";
 
 export class OrderController {
-    async findPaginated(req: Request, res: Response) {
+    constructor(
+        private orderService: OrderService
+    ) { }
+
+    async findAll(req: Request, res: Response) {
         try {
-            const { page = 1, state } = req.query;
+            const queryParams: FetchOrderQueryDto = {
+                page: req.query.page ? Number(req.query.page) : 1,
+                limit: req.query.limit ? Number(req.query.limit) : 10,
+                state: req.query.state as orderStates | undefined
+            }
 
-            const service = new FindPaginatedOrderService(new OrderRepository());
-
-            const result = await service.execute({
-                page: Number(page),
-                state: state as State | undefined,
-            });
+            const result = await this.orderService.findAll(queryParams.limit, queryParams.page, queryParams.state);
 
             return res.json(result);
 
@@ -36,13 +37,42 @@ export class OrderController {
 
     async create(req: Request, res: Response) {
         try {
-            const service = new CreateOrderService(new OrderRepository());
+            const data: CreateOrderDto = req.body;
 
-            const result = await service.execute(req.body);
+            const order = await this.orderService.create(data)
 
-            return res.status(201).json(result);
+            res.status(201).json({
+                message: "Order created successfully",
+                data: order
+            });
 
         } catch (error) {
+            if (error instanceof AppError || error instanceof ServiceError) {
+                return res
+                    .status(error.statusCode)
+                    .json({ message: error.message });
+            }
+
+            return res
+                .status(500)
+                .json({ message: "Internal server error" });
+        }
+    }
+
+    async findById(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+
+            if (!id) {
+                return res.status(400).json({ error: "Order ID is required" });
+            }
+
+            const order = await this.orderService.findById(id);
+
+            return res.json({
+                data: order,
+            });
+        } catch (error: any) {
             if (error instanceof AppError || error instanceof ServiceError) {
                 return res
                     .status(error.statusCode)
@@ -58,16 +88,44 @@ export class OrderController {
     async changeState(req: Request, res: Response) {
         const { id } = req.params;
 
+        if (!id) {
+            return res.status(400).json({ error: "Order ID is required" });
+        }
+
         try {
-            const service = new ChangeStateService(new OrderRepository());
+            const rst = await this.orderService.advance(id);
+
+            return res.json({
+                message: "Order state updated successfully",
+                data: rst,
+            });
+
+        } catch (error: any) {
+            if (error instanceof AppError || error instanceof ServiceError) {
+                return res
+                    .status(error.statusCode)
+                    .json({ message: error.message });
+            }
+
+            return res
+                .status(500)
+                .json({ message: "Internal server error" });
+        }
+    }
+
+    async softDelete(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
 
             if (!id) {
                 return res.status(400).json({ error: "Order ID is required" });
             }
 
-            const result = await service.execute(id);
+            await this.orderService.softDelete(id);
 
-            return res.json(result);
+            return res.json({
+                message: "Order deleted successfully",
+            });
 
         } catch (error: any) {
             if (error instanceof AppError || error instanceof ServiceError) {

@@ -92,12 +92,12 @@ export class UserService {
             throw new Error("User not found");
         }
 
-        // tava dando erro na tipagem sem isso .. 
-        const updateData: Partial<IUser> = {};
-
         if (user.deletedAt) {
             throw new Error("User is deleted");
         }
+
+        // tava dando erro na tipagem sem isso .. 
+        const updateData: Partial<IUser> = {};
 
         if (data.email !== undefined) {
             updateData.email = data.email;

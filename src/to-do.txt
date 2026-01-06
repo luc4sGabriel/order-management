@@ -11,3 +11,10 @@ test: Aumentar area de cobertura dos testes
 se der tempo , faz os utils com o bcript , jwt .. pra usar nos testes mais facil
 
 entrega e ora a deus 
+
+
+refac: controllers
+refac + feat: errors
+env.ts com zod
+utils de bcrypt pra facilitar testes e deixar mais escalavel
+mais testes
