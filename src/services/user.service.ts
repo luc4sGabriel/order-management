@@ -8,6 +8,7 @@ import { PaginatedResponse } from "../types/pagination.types";
 import { IUser, IUserResponse } from "../types/user.type";
 
 import bcrypt from "bcryptjs";
+import { hash } from "../utils/bcrypt.utils";
 
 export class UserService {
     constructor(
@@ -56,11 +57,13 @@ export class UserService {
         }
 
         // DEPOIS FAZER UM UTIL PRA ISSO ..
-        const SALT = 6;
+        // const SALT = 6;
 
-        const hashedPassword = await bcrypt.hash(data.password, SALT);
+        // const hashedPassword = await bcrypt.hash(data.password, SALT);
 
-        console.log("Hashed password:", hashedPassword);
+        // console.log("Hashed password:", hashedPassword);
+
+        const hashedPassword = await hash(data.password);
 
         const user = await this.userRepository.create({
             ...data,

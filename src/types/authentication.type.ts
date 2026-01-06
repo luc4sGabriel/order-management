@@ -1,4 +1,6 @@
+import { IUserResponse } from "./user.type";
+
 export interface ILoginResponse {
-    userId: string;
+    user: IUserResponse;
     token: string;
 }

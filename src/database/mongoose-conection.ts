@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
+import { config } from "../config/env";
 
 export async function connectMongo(){
-  await mongoose.connect(process.env.DATABASE_URL || "");
+  await mongoose.connect(config.databaseUrl);
   console.log("MongoDB conectado");
 }
