@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CreateOrderDto, FetchOrderQueryDto } from "../dtos/order.dto";
+import { CreateOrderDto, CreateOrderServiceSchema, FetchOrderQueryDto } from "../dtos/order.dto";
 import { OrderService } from "../services/order.service";
 import { orderStates } from "../types/enum/enums.type";
 import { BadRequestError } from "../errors/bad-request-error";
@@ -71,6 +71,23 @@ export class OrderController {
 
         return res.json({
             message: "Order deleted successfully",
+        });
+    }
+
+    async addService(req: Request, res: Response) {
+        const { id } = req.params;
+
+        if (!id) {
+            throw new BadRequestError("Order ID is required");
+        }
+
+        const data: CreateOrderServiceSchema = req.body;
+
+        const order = await this.orderService.addService(data, id)
+
+        res.json({
+            message: "Order created successfully",
+            data: order
         });
     }
 }

@@ -28,6 +28,11 @@ orderRoutes.get("/:id", (req, res) =>
     orderController.findById(req, res)
 );
 
+// adicionar servico a order existente
+orderRoutes.patch("/:id/services", (req, res) =>
+    orderController.addService(req, res)
+);
+
 orderRoutes.patch("/:id/advance", (req, res) =>
     orderController.changeState(req, res)
 );

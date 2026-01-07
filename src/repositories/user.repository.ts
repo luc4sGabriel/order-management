@@ -45,7 +45,7 @@ export class UserRepository {
     //                               \  /
     //                                \/
     async update(id: string, data: Partial<IUser>): Promise<IUser | null> {
-        return UserModel.findByIdAndUpdate(id, data, { new: true });
+        CreateOrderServiceSchema
     }
 
 }

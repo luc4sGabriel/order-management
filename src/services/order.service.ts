@@ -1,4 +1,4 @@
-import { CreateOrderDto } from "../dtos/order.dto";
+import { CreateOrderDto, CreateOrderServiceSchema } from "../dtos/order.dto";
 import { BadRequestError } from "../errors/bad-request-error";
 import { NotFoundError } from "../errors/not-found-error";
 import { OrderPresenter } from "../presenters/order.presenter";
@@ -99,6 +99,16 @@ export class OrderService {
         }
 
         return OrderPresenter.toHttp(order);
+    }
+
+    async addService(data: CreateOrderServiceSchema, id: string): Promise<IOrder>{
+        const order = await this.orderRepository.addService(data, id);
+
+        if (!order) {
+            throw new NotFoundError("Order");
+        }
+
+        return order;
     }
 
 }

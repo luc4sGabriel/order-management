@@ -35,5 +35,6 @@ export const fecthOrdersQuerySchema = z.object({
 
 export type CreateOrderDto = z.infer<typeof CreateOrderDTO>;
 export type FetchOrderQueryDto = z.infer<typeof fecthOrdersQuerySchema>;
+export type CreateOrderServiceSchema = z.infer<typeof CreateOrderServiceSchema>;
 
 

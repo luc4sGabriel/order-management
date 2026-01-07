@@ -1,8 +1,9 @@
 import { OrderModel } from "../models/Order";
 import { orderStates, orderStatus } from "../types/enum/enums.type";
 import { IOrder } from "../types/order.type";
-import { CreateOrderDto, CreateOrderDTO } from "../dtos/order.dto";
+import { CreateOrderDto, CreateOrderServiceSchema } from "../dtos/order.dto";
 import { paginate } from "../utils/paginate";
+import { NotFoundError } from "../errors/not-found-error";
 
 export class OrderRepository {
   // Precisei tipar com o DTO pra o typescript inferir o tipo certo no service , dai que criei os dtos tudo ..
@@ -55,4 +56,18 @@ export class OrderRepository {
     return OrderModel.findById(id);
   }
 
+  async addService(data: CreateOrderServiceSchema, id: string): Promise<IOrder> {
+    const order = await OrderModel.findById(id);
+
+    if (!order) {
+      throw new NotFoundError("Order");
+    }
+
+    order.services.push(data);
+    order.updatedAt = new Date();
+
+    order.save();
+
+    return order;
+  }
 }
