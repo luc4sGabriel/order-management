@@ -8,7 +8,7 @@ export const app = express();
 app.use(cors({
   origin: [
     'http://localhost:3000',
-    'http://localhost:5173',
+    'https://order-management-xgpx55.flutterflow.app',
     'https://order-management-il5c.onrender.com',
     // FlutterFlow link
   ],
@@ -16,6 +16,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
+app.options('*', cors());
 app.use(express.json());
 app.use(routes);
 app.use(errorHandler)
