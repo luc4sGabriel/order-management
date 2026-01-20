@@ -6,6 +6,8 @@ node_modules/
 .env.local
 .env.*.local
 
+/src/to-do.txt
+
 # Build
 dist/
 build/

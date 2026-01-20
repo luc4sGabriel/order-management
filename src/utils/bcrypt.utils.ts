@@ -1,5 +1,4 @@
 import bcrypt from "bcryptjs";
-import { config } from "../config/env";
 
 const SALT_ROUNDS = 6;
 

@@ -16,22 +16,6 @@ API REST para gerenciamento de pedidos, com autenticação, paginação, control
 
 ---
 
-## 📂 Arquitetura
-
-O projeto segue uma separação clara de responsabilidades:
-
-src/  
-├── controllers/     # Entrada HTTP (Request / Response)  
-├── services/        # Regras de negócio  
-├── repositories/    # Acesso a dados (MongoDB)  
-├── models/          # Schemas Mongoose  
-├── routes/          # Rotas da aplicação  
-├── middlewares/     # Middlewares (auth, etc)  
-├── dtos/            # Data Transfer Objects  
-└── tests/           # Testes unitários  
-
----
-
 ## 🔐 Autenticação
 
 A API utiliza JWT para autenticação.
