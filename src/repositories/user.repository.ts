@@ -25,7 +25,7 @@ export class UserRepository {
         });
     }
 
-    async create(data: CreateUserDto & { password: string}): Promise<IUser> {
+    async create(data: CreateUserDto & { password: string }): Promise<IUser> {
         const user = new UserModel({
             ...data,
             deletedAt: null, // ja deixo o campo deletedAt como null ao criar
@@ -45,7 +45,10 @@ export class UserRepository {
     //                               \  /
     //                                \/
     async update(id: string, data: Partial<IUser>): Promise<IUser | null> {
-        CreateOrderServiceSchema
+        return await UserModel.findByIdAndUpdate(
+            id,
+            data,
+            { new: true }
+        );
     }
-
 }
